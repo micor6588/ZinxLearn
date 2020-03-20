@@ -6,7 +6,7 @@ import (
 	"net"
 )
 
-// Iserver 的接口实现，定义一个server的服务器模块
+// Server 定义一个server的服务器模块,实现Iserver接口
 type Server struct {
 	Name      string //服务器的名字
 	IPVersion string //服务器绑定的ip版本
@@ -16,7 +16,7 @@ type Server struct {
 
 // Start 实现IServer接口的start方法，启动服务器
 func (s *Server) Start() {
-	fmt.Println("[Start]Server Listenner at IP :%s,Port %d,is starting \n", s.IP, s.Port)
+	fmt.Printf("[Start]Server Listenner at IP :%s,Port %d,is starting \n", s.IP, s.Port)
 	//开启一个go去做服务端Linster业务
 	go func() {
 
@@ -86,9 +86,7 @@ func (s *Server) Server() {
 	select {}
 }
 
-/*
-初始化Server模块的方法
-*/
+// NewServer 初始化Server模块的方法
 func NewServer(name string) ziface.IServer {
 	server := &Server{
 		Name:      name,
