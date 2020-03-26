@@ -2,30 +2,31 @@ package znet
 
 import (
 	"ZinxLearn/Zinx/ziface"
-	"errors"
 	"fmt"
 	"net"
 )
 
 // Server 定义一个server的服务器模块,实现Iserver接口
 type Server struct {
-	Name      string //服务器的名字
-	IPVersion string //服务器绑定的ip版本
-	IP        string //服务器监听的ip
-	Port      int    //服务器监听的ip端口
+	Name      string         //服务器的名字
+	IPVersion string         //服务器绑定的ip版本
+	IP        string         //服务器监听的ip
+	Port      int            //服务器监听的ip端口
+	Router    ziface.IRouter //给当前的Server添加一个router,server注册的链接对应的处理业务
+
 }
 
-// CallBackClient 定义当前客户端所绑定的handle(目前这个handle是写死的，以后优化应该由用户自定义handle)
-func CallBackClient(conn *net.TCPConn, data []byte, cnt int) error {
-	//回显业务的实现
-	fmt.Println("[Conn Handle] CallBackToClient ...")
-	_, err := conn.Write(data[:cnt])
-	if err != nil {
-		fmt.Println("write back buf faild err=", err)
-		return errors.New("CallBackToClient error")
-	}
-	return nil
-}
+// // CallBackClient 定义当前客户端所绑定的handle(目前这个handle是写死的，以后优化应该由用户自定义handle)
+// func CallBackClient(conn *net.TCPConn, data []byte, cnt int) error {
+// 	//回显业务的实现
+// 	fmt.Println("[Conn Handle] CallBackToClient ...")
+// 	_, err := conn.Write(data[:cnt])
+// 	if err != nil {
+// 		fmt.Println("write back buf faild err=", err)
+// 		return errors.New("CallBackToClient error")
+// 	}
+// 	return nil
+// }
 
 // Start 实现IServer接口的start方法，启动服务器
 func (s *Server) Start() {
@@ -62,7 +63,7 @@ func (s *Server) Start() {
 			fmt.Println("Get conn remote addr = ", conn.RemoteAddr().String())
 			countID++
 			//将处理新连接的业务方法和conn进行绑定，得到我们的连接模块
-			dealConn := NewConnection(conn, countID, CallBackClient)
+			dealConn := NewConnection(conn, countID, s.Router)
 
 			//启动当前业务逻辑处理
 			dealConn.Start()
@@ -89,6 +90,12 @@ func (s *Server) Server() {
 	select {}
 }
 
+// AddRouter 路由功能：给当前的服务注册一个路由方法，供客户端链接使用
+func (s *Server) AddRouter(router ziface.IRouter) {
+	s.Router = router
+	fmt.Println("Add Router Succeed!")
+}
+
 // NewServer 初始化Server模块的方法
 func NewServer(name string) ziface.IServer {
 	server := &Server{
@@ -96,6 +103,7 @@ func NewServer(name string) ziface.IServer {
 		IPVersion: "tcp4",
 		IP:        "0.0.0.0",
 		Port:      8080,
+		Router:    nil,
 	}
 	return server
 }
