@@ -28,7 +28,7 @@ func main() {
 		buf := make([]byte, 1024)
 		cnt, err := conn.Read(buf)
 		if err != nil {
-			fmt.Printf("write conn faild err=", err)
+			fmt.Printf("write conn faild err=%v\n", err)
 			return
 		}
 		fmt.Printf("server call back :%s,cnt=%d\n", buf, cnt)
